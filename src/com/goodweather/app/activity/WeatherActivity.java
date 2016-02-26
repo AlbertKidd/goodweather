@@ -73,7 +73,7 @@ public class WeatherActivity extends Activity implements OnClickListener{
 		case R.id.refresh_weather:
 			publishText.setText("Í¬²½ÖÐ...");
 			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-			String weatherCode = prefs.getString("weatherCode", "");
+			String weatherCode = prefs.getString("weather_code", "");
 			if(!TextUtils.isEmpty(weatherCode)){
 				queryWeatherInfo(weatherCode);
 			}
@@ -89,9 +89,9 @@ public class WeatherActivity extends Activity implements OnClickListener{
 		queryFromServer(address, "countyCode");
 	}
 	
-	//qurey weather with weatherCode
+	//query weather with weatherCode
 	private void queryWeatherInfo(String weatherCode){
-		String address = "http://www.weather.com.cn/data/cityinfo/" + weatherCode + ".html";
+		String address = "http://apistore.baidu.com/microservice/weather?cityid=" + weatherCode;
 		queryFromServer(address, "weatherCode");
 	}
 	
