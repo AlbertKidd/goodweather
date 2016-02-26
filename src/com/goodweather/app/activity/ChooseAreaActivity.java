@@ -108,7 +108,7 @@ public class ChooseAreaActivity extends Activity{
 	
 	//query all cities,firstly query from db,if faled query on server
 	private void queryCities(){
-		cityList = goodWeatherDB.loadCities();
+		cityList = goodWeatherDB.loadCities(selectedProvince.getId());
 		if(cityList.size() > 0){
 			dataList.clear();
 			for(City city : cityList){
@@ -125,7 +125,7 @@ public class ChooseAreaActivity extends Activity{
 	
 	//query all counties,firstly query from db,if faled query on server
 	private void queryCounties(){
-		countyList = goodWeatherDB.loadCounties();
+		countyList = goodWeatherDB.loadCounties(selectedCity.getId());
 		if(countyList.size() > 0){
 			dataList.clear();
 			for(County county : countyList){
