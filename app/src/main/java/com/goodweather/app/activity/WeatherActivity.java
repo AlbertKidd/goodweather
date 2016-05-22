@@ -24,72 +24,57 @@ import com.goodweather.app.util.VolleyUtil;
 
 import org.json.JSONObject;
 
-public class WeatherActivity extends AppCompatActivity implements OnClickListener{
-	
-	private LinearLayout weatherInfoLayout;
-	
-	private TextView cityNameText;
-	private TextView publishText;
-	private TextView weatherDespText;
-	private TextView temp1Text;
-	private TextView temp2Text;
-	private TextView currentDateText;
-	private Button switchCity;
-	private Button refreshWeather;
-	
-	@Override
-	protected void onCreate(Bundle savedInstanceState){
-		super.onCreate(savedInstanceState);
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
+public class WeatherActivity extends AppCompatActivity implements OnClickListener {
+
+    @BindView(R.id.switch_city)
+    Button mSwitchCity;
+    @BindView(R.id.city_name)
+    TextView mCityName;
+    @BindView(R.id.refresh_weather)
+    Button mRefreshWeather;
+    @BindView(R.id.publish_text)
+    TextView mPublishText;
+    @BindView(R.id.current_date)
+    TextView mCurrentDate;
+    @BindView(R.id.weather_desp)
+    TextView mWeatherDesp;
+    @BindView(R.id.temp1)
+    TextView mTemp1;
+    @BindView(R.id.temp2)
+    TextView mTemp2;
+    @BindView(R.id.weather_info_layout)
+    LinearLayout mWeatherInfoLayout;
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+
+
+        super.onCreate(savedInstanceState);
         getSupportActionBar().hide();
-		setContentView(R.layout.weather_layout);
-		
-		weatherInfoLayout = (LinearLayout) findViewById(R.id.weather_info_layout);
-		cityNameText = (TextView)findViewById(R.id.city_name);
-		publishText = (TextView)findViewById(R.id.publish_text);
-		weatherDespText = (TextView)findViewById(R.id.weather_desp);
-		temp1Text = (TextView)findViewById(R.id.temp1);
-		temp2Text = (TextView)findViewById(R.id.temp2);
-		currentDateText = (TextView)findViewById(R.id.current_date);
-		switchCity = (Button)findViewById(R.id.switch_city);
-		refreshWeather = (Button)findViewById(R.id.refresh_weather);
-		
-		String weatherCode = getIntent().getStringExtra("weather_code");
-		if(!TextUtils.isEmpty(weatherCode)){
-			publishText.setText("同步中...");
-			weatherInfoLayout.setVisibility(View.INVISIBLE);
-			cityNameText.setVisibility(View.INVISIBLE);
-			queryWeatherInfo(weatherCode);
-		}else{
-			showWeather();
-		}
-		switchCity.setOnClickListener(this);
-		refreshWeather.setOnClickListener(this);
-	}
-	
-	@Override
-	public void onClick(View v){
-		switch(v.getId()){
-		case R.id.switch_city:
-			Intent intent  = new Intent(this, ChooseAreaActivity.class);
-			intent.putExtra("from_weather_activity", true);
-			startActivity(intent);
-			finish();
-			break;
-		case R.id.refresh_weather:
-			publishText.setText("同步中...");
-			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-			String weatherCode = prefs.getString("weather_code", "");
-			if(!TextUtils.isEmpty(weatherCode)){
-				queryWeatherInfo(weatherCode);
-			}
-			break;
-		default:
-			break;
-		}
-	}
-	
-	//query weather with weatherCode
-	private void queryWeatherInfo(String weatherCode){
+        setContentView(R.layout.weather_layout);
+        ButterKnife.bind(this);
+
+
+        String weatherCode = getIntent().getStringExtra("weather_code");
+        if (!TextUtils.isEmpty(weatherCode)) {
+            mPublishText.setText("同步中...");
+            mWeatherInfoLayout.setVisibility(View.INVISIBLE);
+            mCityName.setVisibility(View.INVISIBLE);
+            queryWeatherInfo(weatherCode);
+        } else {
+            showWeather();
+        }
+        mSwitchCity.setOnClickListener(this);
+        mRefreshWeather.setOnClickListener(this);
+    }
+
+    //query weather with weatherCode
+    private void queryWeatherInfo(String weatherCode) {
         String address = "http://weatherapi.market.xiaomi.com/wtr-v2/weather?cityId=" + weatherCode;
         RequestQueue mRequestQueue = VolleyUtil.getRequestQueue();
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(address, null, new Response.Listener<JSONObject>() {
@@ -111,29 +96,48 @@ public class WeatherActivity extends AppCompatActivity implements OnClickListene
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        publishText.setText("同步失败");
+                        mPublishText.setText("同步失败");
                     }
                 });
             }
         });
         mRequestQueue.add(jsonObjectRequest);
-	}
-	
-	//read weatherInfo saved in prefs,show it on ui
-	private void showWeather(){
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		cityNameText.setText(prefs.getString("city_name", ""));
-		temp1Text.setText(prefs.getString("temp1", ""));
-		temp2Text.setText(prefs.getString("temp2", ""));
-		weatherDespText.setText(prefs.getString("weather_desp", ""));
-		publishText.setText("今天" + prefs.getString("publish_time", "") + "发布");
-		currentDateText.setText(prefs.getString("current_date", ""));
-		weatherInfoLayout.setVisibility(View.VISIBLE);
-		cityNameText.setVisibility(View.VISIBLE);
-		
-		Intent intent = new Intent(this, AutoUpdateService.class);
-		startService(intent);
-	}
+    }
+
+    //read weatherInfo saved in prefs,show it on ui
+    private void showWeather() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        mCityName.setText(prefs.getString("city_name", ""));
+        mTemp1.setText(prefs.getString("temp1", ""));
+        mTemp2.setText(prefs.getString("temp2", ""));
+        mWeatherDesp.setText(prefs.getString("weather_desp", ""));
+        mPublishText.setText("今天" + prefs.getString("publish_time", "") + "发布");
+        mCurrentDate.setText(prefs.getString("current_date", ""));
+        mWeatherInfoLayout.setVisibility(View.VISIBLE);
+        mCityName.setVisibility(View.VISIBLE);
+
+        Intent intent = new Intent(this, AutoUpdateService.class);
+        startService(intent);
+    }
 
 
+    @OnClick({R.id.switch_city, R.id.refresh_weather})
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.switch_city:
+                Intent intent = new Intent(this, ChooseAreaActivity.class);
+                intent.putExtra("from_weather_activity", true);
+                startActivity(intent);
+                finish();
+                break;
+            case R.id.refresh_weather:
+                mPublishText.setText("同步中...");
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+                String weatherCode = prefs.getString("weather_code", "");
+                if (!TextUtils.isEmpty(weatherCode)) {
+                    queryWeatherInfo(weatherCode);
+                }
+                break;
+        }
+    }
 }
