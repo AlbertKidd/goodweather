@@ -1,9 +1,5 @@
 package com.goodweather.app.service;
 
-import com.goodweather.app.util.HttpCallbackListener;
-import com.goodweather.app.util.HttpUtil;
-import com.goodweather.app.util.Utility;
-
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -13,8 +9,18 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+import com.goodweather.app.util.ParseUtil;
+
+import org.json.JSONObject;
+
 public class AutoUpdateService extends Service{
-	
+	private RequestQueue mRequestQueue;
+
 	@Override
 	public IBinder onBind(Intent intent){
 		return null;
@@ -41,17 +47,19 @@ public class AutoUpdateService extends Service{
 	private void updateWeather(){
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		String weatherCode = prefs.getString("weatherCode", "");
-		String address = "http://www.weather.com.cn/data/cityinfo/" + weatherCode + ".html";
-		HttpUtil.sendHttpRequest(address, new HttpCallbackListener(){
-			@Override
-			public void onFinish(String response){
-				Utility.handleWeatherResponse(AutoUpdateService.this, response);
-			}
-			
-			@Override
-			public void onError(Exception e){
-				e.printStackTrace();
-			}
-		});
+        String address = "http://weatherapi.market.xiaomi.com/wtr-v2/weather?cityId=" + weatherCode;
+        mRequestQueue = Volley.newRequestQueue(this);
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(address, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                ParseUtil.handleWeatherResponse(AutoUpdateService.this, response);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                error.printStackTrace();
+            }
+        });
+        mRequestQueue.add(jsonObjectRequest);
 	}
 }

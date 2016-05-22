@@ -1,24 +1,29 @@
 package com.goodweather.app.util;
 
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
+import android.text.TextUtils;
+import android.util.Log;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import com.android.volley.RequestQueue;
 import com.goodweather.app.db.GoodWeatherDB;
 import com.goodweather.app.model.City;
 import com.goodweather.app.model.County;
 import com.goodweather.app.model.Province;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
-import android.text.TextUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-public class Utility {
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
+public class ParseUtil {
+
+    private static RequestQueue mRequestQueue;
+
 	//parse and handle province data back from server
 	public synchronized static boolean handleProvincesResponse(GoodWeatherDB goodWeatherDB, String response){
 		if(!TextUtils.isEmpty(response)){
@@ -76,16 +81,19 @@ public class Utility {
 	}
 	
 	//parse json data from server,and save it to db
-	public static void handleWeatherResponse(Context context, String response){
+	public static void handleWeatherResponse(Context context, JSONObject response){
+
+
 		try{
-			JSONObject jsonObject = new JSONObject(response);
-			JSONObject weatherInfo = jsonObject.getJSONObject("retData");
-			String cityName = weatherInfo.getString("city");
-			String weatherCode = weatherInfo.getString("citycode");
-			String temp1 = weatherInfo.getString("l_tmp");
-			String temp2 = weatherInfo.getString("h_tmp");
-			String weatherDesp = weatherInfo.getString("weather");
-			String publishTime = weatherInfo.getString("time");
+			JSONObject weatherInfo = response.getJSONObject("forecast");
+            Log.d("123456", weatherInfo.toString());
+            String cityName = weatherInfo.getString("city");
+			String weatherCode = weatherInfo.getString("cityid");
+			String temp1 = weatherInfo.getString("temp1");
+			String temp2 = weatherInfo.getString("temp2");
+			String weatherDesp = weatherInfo.getString("weather1");
+            JSONObject timeInfo = response.getJSONObject("realtime");
+			String publishTime = timeInfo.getString("time");
 			saveWeatherInfo(context, cityName, weatherCode, temp1, temp2, weatherDesp, publishTime);
 		}catch(JSONException e){
 			e.printStackTrace();
@@ -94,7 +102,7 @@ public class Utility {
 	
 	//save all weather info from server to sharedPreferences file
 	public static void saveWeatherInfo(Context context, String cityName, String weatherCode, String temp1, String temp2, String weatherDesp, String publishTime){
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyyÄêMÔÂdÈÕ", Locale.CHINA);
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyå¹´Mæœˆdæ—¥", Locale.CHINA);
 		SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
 		editor.putBoolean("city_selected", true);
 		editor.putString("city_name", cityName);

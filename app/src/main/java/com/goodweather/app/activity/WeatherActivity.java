@@ -1,25 +1,30 @@
 package com.goodweather.app.activity;
 
-import com.goodweather.app.R;
-import com.goodweather.app.service.AutoUpdateService;
-import com.goodweather.app.util.HttpCallbackListener;
-import com.goodweather.app.util.HttpUtil;
-import com.goodweather.app.util.Utility;
-
-import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class WeatherActivity extends Activity implements OnClickListener{
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.goodweather.app.R;
+import com.goodweather.app.service.AutoUpdateService;
+import com.goodweather.app.util.ParseUtil;
+import com.goodweather.app.util.VolleyUtil;
+
+import org.json.JSONObject;
+
+public class WeatherActivity extends AppCompatActivity implements OnClickListener{
 	
 	private LinearLayout weatherInfoLayout;
 	
@@ -35,7 +40,7 @@ public class WeatherActivity extends Activity implements OnClickListener{
 	@Override
 	protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getSupportActionBar().hide();
 		setContentView(R.layout.weather_layout);
 		
 		weatherInfoLayout = (LinearLayout) findViewById(R.id.weather_info_layout);
@@ -48,12 +53,12 @@ public class WeatherActivity extends Activity implements OnClickListener{
 		switchCity = (Button)findViewById(R.id.switch_city);
 		refreshWeather = (Button)findViewById(R.id.refresh_weather);
 		
-		String countyCode = getIntent().getStringExtra("county_code");
-		if(!TextUtils.isEmpty(countyCode)){
-			publishText.setText("Õ¨≤Ω÷–...");
+		String weatherCode = getIntent().getStringExtra("weather_code");
+		if(!TextUtils.isEmpty(weatherCode)){
+			publishText.setText("ÂêåÊ≠•‰∏≠...");
 			weatherInfoLayout.setVisibility(View.INVISIBLE);
 			cityNameText.setVisibility(View.INVISIBLE);
-			queryWeatherCode(countyCode);
+			queryWeatherInfo(weatherCode);
 		}else{
 			showWeather();
 		}
@@ -71,7 +76,7 @@ public class WeatherActivity extends Activity implements OnClickListener{
 			finish();
 			break;
 		case R.id.refresh_weather:
-			publishText.setText("Õ¨≤Ω÷–...");
+			publishText.setText("ÂêåÊ≠•‰∏≠...");
 			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 			String weatherCode = prefs.getString("weather_code", "");
 			if(!TextUtils.isEmpty(weatherCode)){
@@ -83,53 +88,35 @@ public class WeatherActivity extends Activity implements OnClickListener{
 		}
 	}
 	
-	//query weatherCode with countyCode
-	private void queryWeatherCode(String countyCode){
-		String address = "http://www.weather.com.cn/data/list3/city" + countyCode + ".xml";
-		queryFromServer(address, "countyCode");
-	}
-	
 	//query weather with weatherCode
 	private void queryWeatherInfo(String weatherCode){
-		String address = "http://apistore.baidu.com/microservice/weather?cityid=" + weatherCode;
-		queryFromServer(address, "weatherCode");
-	}
-	
-	//query weatherCode/weatherInfo from server with income address and type
-	private void queryFromServer(final String address, final String type){
-		HttpUtil.sendHttpRequest(address, new HttpCallbackListener(){
-			@Override
-			public void onFinish(final String response){
-				if("countyCode".equals(type)){
-					if(!TextUtils.isEmpty(response)){
-						String[] array = response.split("\\|");
-						if(array != null && array.length == 2){
-							String weatherCode = array[1];
-							queryWeatherInfo(weatherCode);
-						}
-					}
-				}else if("weatherCode".equals(type)){
-					//handle weatherInfo from server
-					Utility.handleWeatherResponse(WeatherActivity.this, response);
-					runOnUiThread(new Runnable(){
-						@Override
-						public void run(){
-							showWeather();
-						}
-					});
-				}
-			}
-			
-			@Override
-			public void onError(Exception e){
-				runOnUiThread(new Runnable(){
-					@Override
-					public void run(){
-						publishText.setText("Õ¨≤Ω ß∞‹");
-					}
-				});
-			}
-		});
+        String address = "http://weatherapi.market.xiaomi.com/wtr-v2/weather?cityId=" + weatherCode;
+        RequestQueue mRequestQueue = VolleyUtil.getRequestQueue();
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(address, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                Log.d("123456", response.toString());
+                ParseUtil.handleWeatherResponse(WeatherActivity.this, response);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        showWeather();
+                    }
+                });
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                error.printStackTrace();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        publishText.setText("ÂêåÊ≠•Â§±Ë¥•");
+                    }
+                });
+            }
+        });
+        mRequestQueue.add(jsonObjectRequest);
 	}
 	
 	//read weatherInfo saved in prefs,show it on ui
@@ -139,7 +126,7 @@ public class WeatherActivity extends Activity implements OnClickListener{
 		temp1Text.setText(prefs.getString("temp1", ""));
 		temp2Text.setText(prefs.getString("temp2", ""));
 		weatherDespText.setText(prefs.getString("weather_desp", ""));
-		publishText.setText("ΩÒÃÏ" + prefs.getString("publish_time", "") + "∑¢≤º");
+		publishText.setText("‰ªäÂ§©" + prefs.getString("publish_time", "") + "ÂèëÂ∏É");
 		currentDateText.setText(prefs.getString("current_date", ""));
 		weatherInfoLayout.setVisibility(View.VISIBLE);
 		cityNameText.setVisibility(View.VISIBLE);
@@ -147,4 +134,6 @@ public class WeatherActivity extends Activity implements OnClickListener{
 		Intent intent = new Intent(this, AutoUpdateService.class);
 		startService(intent);
 	}
+
+
 }

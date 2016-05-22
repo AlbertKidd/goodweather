@@ -1,14 +1,14 @@
 package com.goodweather.app.activity;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -16,19 +16,22 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.goodweather.app.R;
 import com.goodweather.app.db.GoodWeatherDB;
 import com.goodweather.app.model.City;
 import com.goodweather.app.model.County;
 import com.goodweather.app.model.Province;
-import com.goodweather.app.util.HttpCallbackListener;
-import com.goodweather.app.util.HttpUtil;
-import com.goodweather.app.util.Utility;
+import com.goodweather.app.util.MyStringRequest;
+import com.goodweather.app.util.ParseUtil;
+import com.goodweather.app.util.VolleyUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ChooseAreaActivity extends Activity{
+public class ChooseAreaActivity extends AppCompatActivity{
 	public static final int LEVEL_PROVINCE = 0;
 	public static final int LEVEL_CITY = 1;
 	public static final int LEVEL_COUNTY = 2;
@@ -65,7 +68,7 @@ public class ChooseAreaActivity extends Activity{
 			finish();
 			return;
 		}
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		getSupportActionBar().hide();
 		setContentView(R.layout.choose_area);
 		listView = (ListView) findViewById(R.id.list_view);
 		titleText = (TextView) findViewById(R.id.title_text);
@@ -83,8 +86,9 @@ public class ChooseAreaActivity extends Activity{
 					queryCounties();
 				}else if(currentLevel == LEVEL_COUNTY){
 					String countyCode = countyList.get(index).getCountyCode();
+                    String weatherCode = new StringBuilder().append("101").append(countyCode).toString();
 					Intent intent = new Intent(ChooseAreaActivity.this, WeatherActivity.class);
-					intent.putExtra("county_code", countyCode);
+					intent.putExtra("weather_code", weatherCode);
 					startActivity(intent);
 					finish();
 				}
@@ -103,7 +107,7 @@ public class ChooseAreaActivity extends Activity{
 			}
 			adapter.notifyDataSetChanged();
 			listView.setSelection(0);
-			titleText.setText("�й�");
+			titleText.setText("全国");
 			currentLevel = LEVEL_PROVINCE;
 		}else{
 			queryFromServer(null,"province");
@@ -143,7 +147,7 @@ public class ChooseAreaActivity extends Activity{
 			queryFromServer(selectedCity.getCityCode(), "county");
 		}
 	}
-	
+
 	//query province/city/county data with incomed code and type
 	private void queryFromServer(final String code, final String type){
 		String address;
@@ -153,16 +157,19 @@ public class ChooseAreaActivity extends Activity{
 			address = "http://www.weather.com.cn/data/list3/city.xml";
 		}
 		showProgressDialog();
-		HttpUtil.sendHttpRequest(address, new HttpCallbackListener(){
+
+		RequestQueue mQueue = VolleyUtil.getRequestQueue();
+		MyStringRequest mRequest = new MyStringRequest(address, new Response.Listener<String>() {
 			@Override
-			public void onFinish(String response){
-				boolean result = false;
+			public void onResponse(String response) {
+                Log.d("123456", response);
+                boolean result = false;
 				if("province".equals(type)){
-					result = Utility.handleProvincesResponse(goodWeatherDB, response);
+					result = ParseUtil.handleProvincesResponse(goodWeatherDB, response);
 				}else if("city".equals(type)){
-					result = Utility.handleCitiesResponse(goodWeatherDB, response, selectedProvince.getId());
+					result = ParseUtil.handleCitiesResponse(goodWeatherDB, response, selectedProvince.getId());
 				}else if("county".equals(type)){
-					result = Utility.handleCountiesResponse(goodWeatherDB, response, selectedCity.getId());
+					result = ParseUtil.handleCountiesResponse(goodWeatherDB, response, selectedCity.getId());
 				}
 				if (result){
 					runOnUiThread(new Runnable(){
@@ -180,25 +187,26 @@ public class ChooseAreaActivity extends Activity{
 					});
 				}
 			}
-			
+		}, new Response.ErrorListener() {
 			@Override
-			public void onError(Exception e){
+			public void onErrorResponse(VolleyError error) {
 				runOnUiThread(new Runnable(){
 					@Override
 					public void run(){
 						closeProgressDialog();
-						Toast.makeText(ChooseAreaActivity.this, "����ʧ��", Toast.LENGTH_SHORT).show();
+						Toast.makeText(ChooseAreaActivity.this, "Something wrong in Volley...", Toast.LENGTH_SHORT).show();
 					}
 				});
 			}
 		});
+        mQueue.add(mRequest);
 	}
 	
 	//show progress dialog
 	private void showProgressDialog(){
 		if(progressDialog == null){
 			progressDialog = new ProgressDialog(this);
-			progressDialog.setMessage("���ڼ���");
+			progressDialog.setMessage("查询中");
 			progressDialog.setCanceledOnTouchOutside(false);
 		}
 		progressDialog.show();
