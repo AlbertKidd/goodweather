@@ -35,13 +35,13 @@ public class AutoUpdateService extends Service{
 			}
 		}).start();
 		AlarmManager manager = (AlarmManager) getSystemService(ALARM_SERVICE);
-		int anHour = 8*60*60*1000;
+		int anHour = 60*60*1000;
 		long triggerAtTime = SystemClock.elapsedRealtime() + anHour;
 		Intent i = new Intent(this, AutoUpdateReceiver.class);
 		PendingIntent pi = PendingIntent.getBroadcast(this, 0, i, 0);
 		manager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAtTime, pi);
-		return super.onStartCommand(intent, flags, startId);
-	}
+        return super.onStartCommand(intent, flags, startId);
+    }
 	
 	//update weather info
 	private void updateWeather(){
