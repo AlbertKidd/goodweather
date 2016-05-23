@@ -10,7 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.android.volley.RequestQueue;
@@ -30,6 +30,7 @@ import butterknife.OnClick;
 
 public class WeatherActivity extends AppCompatActivity implements OnClickListener {
 
+
     @BindView(R.id.switch_city)
     Button mSwitchCity;
     @BindView(R.id.city_name)
@@ -38,17 +39,28 @@ public class WeatherActivity extends AppCompatActivity implements OnClickListene
     Button mRefreshWeather;
     @BindView(R.id.publish_text)
     TextView mPublishText;
-    @BindView(R.id.current_date)
-    TextView mCurrentDate;
-    @BindView(R.id.weather_desp)
-    TextView mWeatherDesp;
-    @BindView(R.id.temp1)
-    TextView mTemp1;
-    @BindView(R.id.temp2)
-    TextView mTemp2;
+    @BindView(R.id.current_temp)
+    TextView mCurrentTemp;
+    @BindView(R.id.current_weather)
+    TextView mCurrentWeather;
+    @BindView(R.id.pm10)
+    TextView mPm10;
+    @BindView(R.id.pm25)
+    TextView mPm25;
+    @BindView(R.id.day1_weather)
+    TextView mDay1Weather;
+    @BindView(R.id.day1_temp)
+    TextView mDay1Temp;
+    @BindView(R.id.day2_weather)
+    TextView mDay2Weather;
+    @BindView(R.id.day2_temp)
+    TextView mDay2Temp;
+    @BindView(R.id.day3_weather)
+    TextView mDay3Weather;
+    @BindView(R.id.day3_temp)
+    TextView mDay3Temp;
     @BindView(R.id.weather_info_layout)
-    LinearLayout mWeatherInfoLayout;
-
+    RelativeLayout mWeatherInfoLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,8 +75,9 @@ public class WeatherActivity extends AppCompatActivity implements OnClickListene
         String weatherCode = getIntent().getStringExtra("weather_code");
         if (!TextUtils.isEmpty(weatherCode)) {
             mPublishText.setText("同步中...");
-            mWeatherInfoLayout.setVisibility(View.INVISIBLE);
+            //mWeatherInfoLayout.setVisibility(View.INVISIBLE);
             mCityName.setVisibility(View.INVISIBLE);
+            mWeatherInfoLayout.setVisibility(View.INVISIBLE);
             queryWeatherInfo(weatherCode);
         } else {
             showWeather();
@@ -107,12 +120,20 @@ public class WeatherActivity extends AppCompatActivity implements OnClickListene
     //read weatherInfo saved in prefs,show it on ui
     private void showWeather() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        mCityName.setText(prefs.getString("city_name", ""));
-        mTemp1.setText(prefs.getString("temp1", ""));
-        mTemp2.setText(prefs.getString("temp2", ""));
-        mWeatherDesp.setText(prefs.getString("weather_desp", ""));
-        mPublishText.setText("今天" + prefs.getString("publish_time", "") + "发布");
-        mCurrentDate.setText(prefs.getString("current_date", ""));
+
+        mCityName.setText(prefs.getString("city", ""));
+        mPublishText.setText("今天" + prefs.getString("time", "") + "发布");
+        mCurrentTemp.setText(prefs.getString("temp", ""));
+        mCurrentWeather.setText(prefs.getString("weather", ""));
+        mPm10.setText("pm10:" + prefs.getString("pm10", ""));
+        mPm25.setText("pm25:" + prefs.getString("pm25", ""));
+        mDay1Weather.setText(prefs.getString("weather1", ""));
+        mDay1Temp.setText(prefs.getString("temp1", ""));
+        mDay2Weather.setText(prefs.getString("weather2", ""));
+        mDay2Temp.setText(prefs.getString("temp2", ""));
+        mDay3Weather.setText(prefs.getString("weather3", ""));
+        mDay3Temp.setText(prefs.getString("temp3", ""));
+
         mWeatherInfoLayout.setVisibility(View.VISIBLE);
         mCityName.setVisibility(View.VISIBLE);
 
@@ -133,7 +154,7 @@ public class WeatherActivity extends AppCompatActivity implements OnClickListene
             case R.id.refresh_weather:
                 mPublishText.setText("同步中...");
                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-                String weatherCode = prefs.getString("weather_code", "");
+                String weatherCode = prefs.getString("weatherCode", "");
                 if (!TextUtils.isEmpty(weatherCode)) {
                     queryWeatherInfo(weatherCode);
                 }

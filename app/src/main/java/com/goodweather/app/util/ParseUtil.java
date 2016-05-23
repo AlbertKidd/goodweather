@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.android.volley.RequestQueue;
 import com.goodweather.app.db.GoodWeatherDB;
@@ -15,10 +14,6 @@ import com.goodweather.app.model.Province;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 
 public class ParseUtil {
 
@@ -85,33 +80,46 @@ public class ParseUtil {
 
 
 		try{
-			JSONObject weatherInfo = response.getJSONObject("forecast");
-            Log.d("123456", weatherInfo.toString());
-            String cityName = weatherInfo.getString("city");
-			String weatherCode = weatherInfo.getString("cityid");
-			String temp1 = weatherInfo.getString("temp1");
-			String temp2 = weatherInfo.getString("temp2");
-			String weatherDesp = weatherInfo.getString("weather1");
-            JSONObject timeInfo = response.getJSONObject("realtime");
-			String publishTime = timeInfo.getString("time");
-			saveWeatherInfo(context, cityName, weatherCode, temp1, temp2, weatherDesp, publishTime);
+			JSONObject forecast = response.getJSONObject("forecast");
+            String city = forecast.getString("city");
+			String weatherCode = forecast.getString("cityid");
+			String weather1 = forecast.getString("weather1");
+            String weather2 = forecast.getString("weather2");
+            String weather3 = forecast.getString("weather3");
+            String temp1 = forecast.getString("temp1");
+            String temp2 = forecast.getString("temp2");
+            String temp3 = forecast.getString("temp3");
+
+            JSONObject realTime = response.getJSONObject("realtime");
+			String time = realTime.getString("time");
+            String temp = realTime.getString("temp");
+            String weather = realTime.getString("weather");
+
+            JSONObject aqi = response.getJSONObject("aqi");
+            String pm25 = aqi.getString("pm25");
+            String pm10 = aqi.getString("pm10");
+
+			SharedPreferences.Editor editor = PreferenceManager
+                    .getDefaultSharedPreferences(context).edit();
+
+            editor.putBoolean("city_selected", true);
+            editor.putString("city", city);
+            editor.putString("weatherCode", weatherCode);
+            editor.putString("weather1", weather1);
+            editor.putString("weather2", weather2);
+            editor.putString("weather3", weather3);
+            editor.putString("temp1", temp1);
+            editor.putString("temp2", temp2);
+            editor.putString("temp3", temp3);
+            editor.putString("time", time);
+            editor.putString("temp", temp);
+            editor.putString("weather", weather);
+            editor.putString("pm25", pm25);
+            editor.putString("pm10", pm10);
+            editor.apply();
 		}catch(JSONException e){
 			e.printStackTrace();
 		}
 	}
-	
-	//save all weather info from server to sharedPreferences file
-	public static void saveWeatherInfo(Context context, String cityName, String weatherCode, String temp1, String temp2, String weatherDesp, String publishTime){
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy年M月d日", Locale.CHINA);
-		SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
-		editor.putBoolean("city_selected", true);
-		editor.putString("city_name", cityName);
-		editor.putString("weather_code", weatherCode);
-		editor.putString("temp1", temp1);
-		editor.putString("temp2", temp2);
-		editor.putString("weather_desp", weatherDesp);
-		editor.putString("publish_time", publishTime);
-		editor.putString("current_date", sdf.format(new Date()));
-		editor.commit();
-	}
+
 }
