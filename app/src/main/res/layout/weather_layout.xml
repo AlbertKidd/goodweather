@@ -126,7 +126,7 @@
                         android:paddingRight="80dp"
                         android:layout_gravity="center_vertical"
                         android:textColor="#FFF"
-                        tools:text="pm10:83"
+                        tools:text="pm10 : 83"
                         />
 
                     <TextView
@@ -136,7 +136,7 @@
                         android:layout_gravity="center_vertical"
                         android:paddingLeft="80dp"
                         android:textColor="#FFF"
-                        tools:text="pm2.5:43"
+                        tools:text="pm2.5 : 43"
                         />
                 </RelativeLayout>
             </LinearLayout>

@@ -74,6 +74,14 @@ public class ParseUtil {
 		}
 		return false;
 	}
+
+    public synchronized static String handleCountyCodeResponse(String response){
+        if(!TextUtils.isEmpty(response)){
+            String[] array = response.split("\\|");
+            return array[1];
+        }else
+            return null;
+    }
 	
 	//parse json data from server,and save it to db
 	public static void handleWeatherResponse(Context context, JSONObject response){

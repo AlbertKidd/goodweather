@@ -87,6 +87,9 @@ public class WeatherActivity extends AppCompatActivity implements OnClickListene
         mSwitchCity.setOnClickListener(this);
         mRefreshWeather.setOnClickListener(this);
         mRefreshLayout.setOnRefreshListener(this);
+        mRefreshLayout.setColorSchemeResources(
+                R.color.swiperefresh_color1, R.color.swiperefresh_color2,
+                R.color.swiperefresh_color3, R.color.swiperefresh_color4);
     }
 
     //query weather with weatherCode
@@ -128,8 +131,8 @@ public class WeatherActivity extends AppCompatActivity implements OnClickListene
         mPublishText.setText("今天" + prefs.getString("time", "") + "发布");
         mCurrentTemp.setText(prefs.getString("temp", ""));
         mCurrentWeather.setText(prefs.getString("weather", ""));
-        mPm10.setText("pm10:" + prefs.getString("pm10", ""));
-        mPm25.setText("pm25:" + prefs.getString("pm25", ""));
+        mPm10.setText("pm10 : " + prefs.getString("pm10", ""));
+        mPm25.setText("pm25 : " + prefs.getString("pm25", ""));
         mDay1Weather.setText(prefs.getString("weather1", ""));
         mDay1Temp.setText(prefs.getString("temp1", ""));
         mDay2Weather.setText(prefs.getString("weather2", ""));

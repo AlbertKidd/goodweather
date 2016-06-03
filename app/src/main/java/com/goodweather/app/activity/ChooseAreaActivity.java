@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -55,13 +54,15 @@ public class ChooseAreaActivity extends AppCompatActivity {
     private List<City> cityList;
     private List<County> countyList;
 
+    private String weatherCode;
+
     //selected province,city,county,level
     private Province selectedProvince;
     private City selectedCity;
     private County selectedCounty;
     private int currentLevel;
 
-    //judge wether back from WeatherActivity
+    //judge weather back from WeatherActivity
     private boolean isFromWeatherActivity;
 
     @Override
@@ -93,11 +94,7 @@ public class ChooseAreaActivity extends AppCompatActivity {
                     queryCounties();
                 } else if (currentLevel == LEVEL_COUNTY) {
                     String countyCode = countyList.get(index).getCountyCode();
-                    String weatherCode = new StringBuilder().append("101").append(countyCode).toString();
-                    Intent intent = new Intent(ChooseAreaActivity.this, WeatherActivity.class);
-                    intent.putExtra("weather_code", weatherCode);
-                    startActivity(intent);
-                    finish();
+                    queryFromServer(countyCode, "countyCode");
                 }
             }
         });
@@ -155,7 +152,7 @@ public class ChooseAreaActivity extends AppCompatActivity {
         }
     }
 
-    //query province/city/county data with incomed code and type
+    //query province/city/county data with code and type
     private void queryFromServer(final String code, final String type) {
         String address;
         if (!TextUtils.isEmpty(code)) {
@@ -169,7 +166,14 @@ public class ChooseAreaActivity extends AppCompatActivity {
         MyStringRequest mRequest = new MyStringRequest(address, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                Log.d("123456", response);
+                if ("countyCode".equals(type)) {
+                    weatherCode = ParseUtil.handleCountyCodeResponse(response);
+                    Intent intent = new Intent(ChooseAreaActivity.this, WeatherActivity.class);
+                    intent.putExtra("weatherCode", weatherCode);
+                    startActivity(intent);
+                    finish();
+                    return;
+                }
                 boolean result = false;
                 if ("province".equals(type)) {
                     result = ParseUtil.handleProvincesResponse(goodWeatherDB, response);
