@@ -1,18 +1,9 @@
 package com.goodweather.app.model;
 
 public class County {
-	private int id;
 	private String countyName;
 	private String countyCode;
-	private int cityId;
-	
-	public int getId(){
-		return id;
-	}
-	
-	public void setId(int id){
-		this.id = id;
-	}
+	private String cityId;
 	
 	public String getCountyName(){
 		return countyName;
@@ -30,11 +21,11 @@ public class County {
 		this.countyCode = countyCode;
 	}
 	
-	public int getCityId(){
+	public String getCityId(){
 		return cityId;
 	}
 	
-	public void setCityId(int cityId){
+	public void setCityId(String cityId){
 		this.cityId = cityId;
 	}
 }

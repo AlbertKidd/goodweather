@@ -47,7 +47,7 @@ public class ChooseAreaActivity extends AppCompatActivity {
     private ProgressDialog progressDialog;
     private ArrayAdapter<String> adapter;
     private GoodWeatherDB goodWeatherDB;
-    private List<String> dataList = new ArrayList<String>();
+    private List<String> dataList = new ArrayList<>();
 
     //province,city,county list
     private List<Province> provinceList;
@@ -76,11 +76,10 @@ public class ChooseAreaActivity extends AppCompatActivity {
             finish();
             return;
         }
-        getSupportActionBar().hide();
         setContentView(R.layout.choose_area);
         ButterKnife.bind(this);
 
-        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, dataList);
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, dataList);
         mListView.setAdapter(adapter);
         goodWeatherDB = GoodWeatherDB.getInstance(this);
         mListView.setOnItemClickListener(new OnItemClickListener() {
@@ -93,8 +92,10 @@ public class ChooseAreaActivity extends AppCompatActivity {
                     selectedCity = cityList.get(index);
                     queryCounties();
                 } else if (currentLevel == LEVEL_COUNTY) {
-                    String countyCode = countyList.get(index).getCountyCode();
-                    queryFromServer(countyCode, "countyCode");
+                    County county = countyList.get(index);
+                    String countyCode = county.getCountyCode();
+                    String countyName = county.getCountyName();
+                    queryFromServer(countyCode, "countyCode", countyName);
                 }
             }
         });
@@ -110,34 +111,33 @@ public class ChooseAreaActivity extends AppCompatActivity {
                 dataList.add(province.getProvinceName());
             }
             adapter.notifyDataSetChanged();
-            mListView.setSelection(0);
+            //mListView.setSelection(0);
             mTitleText.setText("全国");
             currentLevel = LEVEL_PROVINCE;
         } else {
-            queryFromServer(null, "province");
+            queryFromServer(null, "province", null);
         }
     }
 
-    //query all cities,firstly query from db,if faled query on server
+    //query all cities,firstly query from db,if failed query on server
     private void queryCities() {
-        cityList = goodWeatherDB.loadCities(selectedProvince.getId());
+        cityList = goodWeatherDB.loadCities(selectedProvince.getProvinceCode());
         if (cityList.size() > 0) {
             dataList.clear();
             for (City city : cityList) {
                 dataList.add(city.getCityName());
             }
             adapter.notifyDataSetChanged();
-            mListView.setSelection(0);
             mTitleText.setText(selectedProvince.getProvinceName());
             currentLevel = LEVEL_CITY;
         } else {
-            queryFromServer(selectedProvince.getProvinceCode(), "city");
+            queryFromServer(selectedProvince.getProvinceCode(), "city", null);
         }
     }
 
-    //query all counties,firstly query from db,if faled query on server
+    //query all counties,firstly query from db,if failed query on server
     private void queryCounties() {
-        countyList = goodWeatherDB.loadCounties(selectedCity.getId());
+        countyList = goodWeatherDB.loadCounties(selectedCity.getCityCode());
         if (countyList.size() > 0) {
             dataList.clear();
             for (County county : countyList) {
@@ -148,12 +148,12 @@ public class ChooseAreaActivity extends AppCompatActivity {
             mTitleText.setText(selectedCity.getCityName());
             currentLevel = LEVEL_COUNTY;
         } else {
-            queryFromServer(selectedCity.getCityCode(), "county");
+            queryFromServer(selectedCity.getCityCode(), "county", null);
         }
     }
 
     //query province/city/county data with code and type
-    private void queryFromServer(final String code, final String type) {
+    private void queryFromServer(final String code, final String type, final String name) {
         String address;
         if (!TextUtils.isEmpty(code)) {
             address = "http://www.weather.com.cn/data/list3/city" + code + ".xml";
@@ -170,6 +170,7 @@ public class ChooseAreaActivity extends AppCompatActivity {
                     weatherCode = ParseUtil.handleCountyCodeResponse(response);
                     Intent intent = new Intent(ChooseAreaActivity.this, WeatherActivity.class);
                     intent.putExtra("weatherCode", weatherCode);
+                    intent.putExtra("countyName", name);
                     startActivity(intent);
                     finish();
                     return;
@@ -178,9 +179,9 @@ public class ChooseAreaActivity extends AppCompatActivity {
                 if ("province".equals(type)) {
                     result = ParseUtil.handleProvincesResponse(goodWeatherDB, response);
                 } else if ("city".equals(type)) {
-                    result = ParseUtil.handleCitiesResponse(goodWeatherDB, response, selectedProvince.getId());
+                    result = ParseUtil.handleCitiesResponse(goodWeatherDB, response, selectedProvince.getProvinceCode());
                 } else if ("county".equals(type)) {
-                    result = ParseUtil.handleCountiesResponse(goodWeatherDB, response, selectedCity.getId());
+                    result = ParseUtil.handleCountiesResponse(goodWeatherDB, response, selectedCity.getCityCode());
                 }
                 if (result) {
                     runOnUiThread(new Runnable() {

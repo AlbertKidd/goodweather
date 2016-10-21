@@ -23,7 +23,7 @@ public class ParseUtil {
 	public synchronized static boolean handleProvincesResponse(GoodWeatherDB goodWeatherDB, String response){
 		if(!TextUtils.isEmpty(response)){
 			String[] allProvinces = response.split(",");
-			if(allProvinces != null && allProvinces.length > 0){
+			if(allProvinces.length > 0){
 				for(String p : allProvinces){
 					String[] array = p.split("\\|");
 					Province province = new Province();
@@ -38,7 +38,7 @@ public class ParseUtil {
 	}
 	
 	//parse and handle city data back from server
-	public synchronized static boolean handleCitiesResponse(GoodWeatherDB goodWeatherDB, String response, int provinceId){
+	public synchronized static boolean handleCitiesResponse(GoodWeatherDB goodWeatherDB, String response, String provinceId){
 		if(!TextUtils.isEmpty(response)){
 			String[] allCities = response.split(",");
 			if(allCities != null && allCities.length > 0){
@@ -57,7 +57,7 @@ public class ParseUtil {
 	}
 	
 	//parse and handle county data back from server
-	public synchronized static boolean handleCountiesResponse(GoodWeatherDB goodWeatherDB, String response, int cityId){
+	public synchronized static boolean handleCountiesResponse(GoodWeatherDB goodWeatherDB, String response, String cityId){
 		if(!TextUtils.isEmpty(response)){
 			String[] allCounties = response.split(",");
 			if(allCounties != null && allCounties.length > 0){
@@ -89,7 +89,7 @@ public class ParseUtil {
 
 		try{
 			JSONObject forecast = response.getJSONObject("forecast");
-            String city = forecast.getString("city");
+            //String city = forecast.getString("city");
 			String weatherCode = forecast.getString("cityid");
 			String weather1 = forecast.getString("weather1");
             String weather2 = forecast.getString("weather2");
@@ -111,7 +111,7 @@ public class ParseUtil {
                     .getDefaultSharedPreferences(context).edit();
 
             editor.putBoolean("city_selected", true);
-            editor.putString("city", city);
+            //editor.putString("city", city);
             editor.putString("weatherCode", weatherCode);
             editor.putString("weather1", weather1);
             editor.putString("weather2", weather2);

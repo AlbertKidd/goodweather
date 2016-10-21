@@ -7,7 +7,6 @@ import android.preference.PreferenceManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -70,14 +69,20 @@ public class WeatherActivity extends AppCompatActivity implements OnClickListene
 
 
         super.onCreate(savedInstanceState);
-        getSupportActionBar().hide();
         setContentView(R.layout.weather_layout);
         ButterKnife.bind(this);
 
         String weatherCode = getIntent().getStringExtra("weatherCode");
+        String countyName = getIntent().getStringExtra("countyName");
+
+        if (!TextUtils.isEmpty(countyName)){
+            SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
+            editor.putString("city", countyName);
+            editor.apply();
+        }
+
         if (!TextUtils.isEmpty(weatherCode)) {
             mPublishText.setText("同步中...");
-            //mWeatherInfoLayout.setVisibility(View.INVISIBLE);
             mCityName.setVisibility(View.INVISIBLE);
             mWeatherInfoLayout.setVisibility(View.INVISIBLE);
             queryWeatherInfo(weatherCode);
@@ -93,13 +98,12 @@ public class WeatherActivity extends AppCompatActivity implements OnClickListene
     }
 
     //query weather with weatherCode
-    private void queryWeatherInfo(String weatherCode) {
+    public void queryWeatherInfo(String weatherCode) {
         String address = "http://weatherapi.market.xiaomi.com/wtr-v2/weather?cityId=" + weatherCode;
         RequestQueue mRequestQueue = VolleyUtil.getRequestQueue();
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(address, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
-                Log.d("123456", response.toString());
                 ParseUtil.handleWeatherResponse(WeatherActivity.this, response);
                 runOnUiThread(new Runnable() {
                     @Override

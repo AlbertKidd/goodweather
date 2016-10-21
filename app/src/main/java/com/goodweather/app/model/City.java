@@ -1,18 +1,9 @@
 package com.goodweather.app.model;
 
 public class City {
-	private int id;
 	private String cityName;
 	private String cityCode;
-	private int provinceId;
-	
-	public int getId(){
-		return id;
-	}
-	
-	public void setId(int id){
-		this.id = id;
-	}
+	private String provinceId;
 	
 	public String getCityName(){
 		return cityName;
@@ -30,11 +21,11 @@ public class City {
 		this.cityCode = cityCode;
 	}
 	
-	public int getProvinceId(){
+	public String getProvinceId(){
 		return provinceId;
 	}
 	
-	public void setProvinceId(int provinceId){
+	public void setProvinceId(String provinceId){
 		this.provinceId = provinceId;
 	}
 }

@@ -1,23 +1,23 @@
 package com.goodweather.app.db;
 
-import java.util.ArrayList;
-import java.util.List;
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 
 import com.goodweather.app.model.City;
 import com.goodweather.app.model.County;
 import com.goodweather.app.model.Province;
 
-import android.content.ContentValues;
-import android.content.Context;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GoodWeatherDB {
 	//db name
 	public static final String DB_NAME = "good_weather";
 	
 	//db version
-	public static final int VERSION = 1;
+	private static final int VERSION = 1;
 	private static GoodWeatherDB goodWeatherDB;
 	private SQLiteDatabase db;
 	
@@ -52,7 +52,7 @@ public class GoodWeatherDB {
 		if(cursor.moveToFirst()){
 			do{
 				Province province = new Province();
-				province.setId(cursor.getInt(cursor.getColumnIndex("id")));
+				//province.setId(cursor.getInt(cursor.getColumnIndex("id")));
 				province.setProvinceName(cursor.getString(cursor.getColumnIndex("province_name")));
 				province.SetProvinceCode(cursor.getString(cursor.getColumnIndex("province_code")));
 				list.add(province);
@@ -73,16 +73,15 @@ public class GoodWeatherDB {
 	}
 	
 	//read city data from bd
-	public List<City> loadCities(int provinceId){
+	public List<City> loadCities(String provinceId){
 		List<City> list = new ArrayList<City>();
-		Cursor cursor = db.query("City", null, "province_id = ?", new String[] {String.valueOf(provinceId)}, null, null, null);
+		Cursor cursor = db.query("City", null, "province_id = ?", new String[] {provinceId}, null, null, null);
 		if(cursor.moveToFirst()){
 			do{
 				City city = new City();
-				city.setId(cursor.getInt(cursor.getColumnIndex("id")));
 				city.setCityName(cursor.getString(cursor.getColumnIndex("city_name")));
 				city.setCityCode(cursor.getString(cursor.getColumnIndex("city_code")));
-				city.setProvinceId(cursor.getInt(cursor.getColumnIndex("province_id")));
+				city.setProvinceId(provinceId);
 				list.add(city);
 			}while(cursor.moveToNext());
 		}
@@ -101,16 +100,15 @@ public class GoodWeatherDB {
 	}
 	
 	//read county data from db
-	public List<County> loadCounties(int cityId){
+	public List<County> loadCounties(String cityId){
 		List<County> list = new ArrayList<County>();
-		Cursor cursor = db.query("County", null, "city_id = ?", new String[] {String.valueOf(cityId)}, null, null, null);
+		Cursor cursor = db.query("County", null, "city_id = ?", new String[] {cityId}, null, null, null);
 		if(cursor.moveToFirst()){
 			do{
 				County county = new County();
-				county.setId(cursor.getInt(cursor.getColumnIndex("id")));
 				county.setCountyName(cursor.getString(cursor.getColumnIndex("county_name")));
 				county.setCountyCode(cursor.getString(cursor.getColumnIndex("county_code")));
-				county.setCityId(cursor.getInt(cursor.getColumnIndex("city_id")));
+				county.setCityId(cityId);
 				list.add(county);
 			}while(cursor.moveToNext());
 		}
