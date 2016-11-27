@@ -104,6 +104,7 @@ public class ParseUtil {
             String weather = realTime.getString("weather");
 
             JSONObject aqi = response.getJSONObject("aqi");
+            String aqiNumber = aqi.getString("aqi");
             String pm25 = aqi.getString("pm25");
             String pm10 = aqi.getString("pm10");
 
@@ -122,6 +123,7 @@ public class ParseUtil {
             editor.putString("time", time);
             editor.putString("temp", temp);
             editor.putString("weather", weather);
+            editor.putString("aqi", aqiNumber);
             editor.putString("pm25", pm25);
             editor.putString("pm10", pm10);
             editor.apply();

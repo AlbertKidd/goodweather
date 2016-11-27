@@ -21,6 +21,7 @@ import com.goodweather.app.R;
 import com.goodweather.app.service.AutoUpdateService;
 import com.goodweather.app.util.ParseUtil;
 import com.goodweather.app.util.VolleyUtil;
+import com.goodweather.app.widget.AqiView;
 
 import org.json.JSONObject;
 
@@ -63,6 +64,8 @@ public class WeatherActivity extends AppCompatActivity implements OnClickListene
     RelativeLayout mWeatherInfoLayout;
     @BindView(R.id.refresh_layout)
     SwipeRefreshLayout mRefreshLayout;
+    @BindView(R.id.aqi_view)
+    AqiView mAqiView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,6 +138,7 @@ public class WeatherActivity extends AppCompatActivity implements OnClickListene
         mPublishText.setText("今天" + prefs.getString("time", "") + "发布");
         mCurrentTemp.setText(prefs.getString("temp", ""));
         mCurrentWeather.setText(prefs.getString("weather", ""));
+        mAqiView.setAqi(Float.parseFloat(prefs.getString("aqi", "0")));
         mPm10.setText("pm10 : " + prefs.getString("pm10", ""));
         mPm25.setText("pm25 : " + prefs.getString("pm25", ""));
         mDay1Weather.setText(prefs.getString("weather1", ""));
