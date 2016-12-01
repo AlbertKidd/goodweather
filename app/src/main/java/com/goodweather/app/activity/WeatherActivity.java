@@ -1,5 +1,6 @@
 package com.goodweather.app.activity;
 
+import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -76,13 +77,6 @@ public class WeatherActivity extends AppCompatActivity implements OnClickListene
         ButterKnife.bind(this);
 
         String weatherCode = getIntent().getStringExtra("weatherCode");
-        String countyName = getIntent().getStringExtra("countyName");
-
-        if (!TextUtils.isEmpty(countyName)){
-            SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
-            editor.putString("city", countyName);
-            editor.apply();
-        }
 
         if (!TextUtils.isEmpty(weatherCode)) {
             mPublishText.setText("同步中...");
@@ -179,6 +173,7 @@ public class WeatherActivity extends AppCompatActivity implements OnClickListene
 
     private void refreshWeather() {
         mPublishText.setText("同步中...");
+        ObjectAnimator.ofFloat(mRefreshWeather, "rotation", 0, 360).setDuration(1000).start();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         String weatherCode = prefs.getString("weatherCode", "");
         if (!TextUtils.isEmpty(weatherCode)) {

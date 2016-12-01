@@ -33,6 +33,8 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static android.R.attr.name;
+
 public class ChooseAreaActivity extends AppCompatActivity {
 
     public static final int LEVEL_PROVINCE = 0;
@@ -59,7 +61,6 @@ public class ChooseAreaActivity extends AppCompatActivity {
     //selected province,city,county,level
     private Province selectedProvince;
     private City selectedCity;
-    private County selectedCounty;
     private int currentLevel;
 
     //judge weather back from WeatherActivity
@@ -92,10 +93,8 @@ public class ChooseAreaActivity extends AppCompatActivity {
                     selectedCity = cityList.get(index);
                     queryCounties();
                 } else if (currentLevel == LEVEL_COUNTY) {
-                    County county = countyList.get(index);
-                    String countyCode = county.getCountyCode();
-                    String countyName = county.getCountyName();
-                    queryFromServer(countyCode, "countyCode", countyName);
+                    String countyCode = countyList.get(index).getCountyCode();
+                    queryFromServer(countyCode, "countyCode");
                 }
             }
         });
@@ -115,7 +114,7 @@ public class ChooseAreaActivity extends AppCompatActivity {
             mTitleText.setText("全国");
             currentLevel = LEVEL_PROVINCE;
         } else {
-            queryFromServer(null, "province", null);
+            queryFromServer(null, "province");
         }
     }
 
@@ -131,7 +130,7 @@ public class ChooseAreaActivity extends AppCompatActivity {
             mTitleText.setText(selectedProvince.getProvinceName());
             currentLevel = LEVEL_CITY;
         } else {
-            queryFromServer(selectedProvince.getProvinceCode(), "city", null);
+            queryFromServer(selectedProvince.getProvinceCode(), "city");
         }
     }
 
@@ -148,12 +147,12 @@ public class ChooseAreaActivity extends AppCompatActivity {
             mTitleText.setText(selectedCity.getCityName());
             currentLevel = LEVEL_COUNTY;
         } else {
-            queryFromServer(selectedCity.getCityCode(), "county", null);
+            queryFromServer(selectedCity.getCityCode(), "county");
         }
     }
 
     //query province/city/county data with code and type
-    private void queryFromServer(final String code, final String type, final String name) {
+    private void queryFromServer(final String code, final String type) {
         String address;
         if (!TextUtils.isEmpty(code)) {
             address = "http://www.weather.com.cn/data/list3/city" + code + ".xml";

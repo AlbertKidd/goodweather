@@ -89,7 +89,6 @@ public class ParseUtil {
 
 		try{
 			JSONObject forecast = response.getJSONObject("forecast");
-            //String city = forecast.getString("city");
 			String weatherCode = forecast.getString("cityid");
 			String weather1 = forecast.getString("weather1");
             String weather2 = forecast.getString("weather2");
@@ -104,6 +103,7 @@ public class ParseUtil {
             String weather = realTime.getString("weather");
 
             JSONObject aqi = response.getJSONObject("aqi");
+            String city = aqi.getString("city");
             String aqiNumber = aqi.getString("aqi");
             String pm25 = aqi.getString("pm25");
             String pm10 = aqi.getString("pm10");
@@ -112,7 +112,7 @@ public class ParseUtil {
                     .getDefaultSharedPreferences(context).edit();
 
             editor.putBoolean("city_selected", true);
-            //editor.putString("city", city);
+            editor.putString("city", city);
             editor.putString("weatherCode", weatherCode);
             editor.putString("weather1", weather1);
             editor.putString("weather2", weather2);
